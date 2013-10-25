@@ -1,0 +1,100 @@
+import processing.core.PVector;
+import pbox2d.*;
+import org.jbox2d.common.*;
+import org.jbox2d.dynamics.joints.*;
+import org.jbox2d.collision.shapes.*;
+import org.jbox2d.collision.shapes.Shape;
+import org.jbox2d.common.*;
+import org.jbox2d.dynamics.*;
+import org.jbox2d.dynamics.contacts.*;
+
+public class SpringyTriangle {
+	
+	PApplet p, PBox2D b;
+
+	Particle tAnchor;
+	Particle tStartAnchor;
+	Particle tEndAnchor;
+	Particle tImpactor;
+
+	PVector topStart;
+	PVector topAnchor;
+	PVector tEnd;
+	PVector topMp;
+
+	int c;
+
+	DistanceJointDef topSpring;
+
+	float a;
+	Vec2 imp;
+	Vec2 force;
+
+	SpringyTriangle(PApplet _p, PBox2D _b, PVector _topStart, PVector _topAnchor, PVector _tEnd, int _c, Vec2 _force) {
+
+		topStart = _topStart;
+		topAnchor = _topAnchor;
+		tEnd = _tEnd;
+		topMp = new PVector( (topStart.x+tEnd.x)/2 , (topStart.y+tEnd.y)/2);  
+		a = PVector.angleBetween(topMp, topAnchor);
+		c = _c;
+		force = _force;
+
+		tAnchor = new Particle(topAnchor.x, topAnchor.y, 4, true);
+		tImpactor = new Particle(topMp.x, topMp.y, 4, false);
+		tStartAnchor = new Particle(topStart.x, topStart.y, 4, true);
+		tEndAnchor = new Particle(tEnd.x, tEnd.y, 4, true);
+
+		topSpring = new DistanceJointDef();
+
+		DistanceJointDef djd = new DistanceJointDef();
+		djd.bodyA = tAnchor.body;
+		djd.bodyB = tImpactor.body;
+		float len = dist(topMp.x, topMp.y, topAnchor.x, topAnchor.y);
+		djd.length = box2d.scalarPixelsToWorld(len);
+		djd.frequencyHz = 1;  // Try a value less than 5
+		djd.dampingRatio = 0.25; // Ranges between 0 and 1
+		DistanceJoint dj = (DistanceJoint) box2d.world.createJoint(djd);
+
+		DistanceJointDef djdA = new DistanceJointDef();
+		djdA.bodyA = tStartAnchor.body;
+		djdA.bodyB = tImpactor.body;
+		float lenA = dist(topMp.x, topMp.y, topStart.x, topStart.y);
+		djdA.length = box2d.scalarPixelsToWorld(lenA);
+		djdA.frequencyHz = 1;  // Try a value less than 5
+		djdA.dampingRatio = 0.1; // Ranges between 0 and 1
+		DistanceJoint djA = (DistanceJoint) box2d.world.createJoint(djdA);
+
+		DistanceJointDef djdB = new DistanceJointDef();
+		djdB.bodyA = tEndAnchor.body;
+		djdB.bodyB = tImpactor.body;
+		float lenB = dist(topMp.x, topMp.y, tEnd.x, tEnd.y);
+		djdB.length = box2d.scalarPixelsToWorld(lenB);
+		djdB.frequencyHz = 1;  // Try a value less than 5
+		djd.dampingRatio = 0.1; // Ranges between 0 and 1
+		DistanceJoint djB = (DistanceJoint) box2d.world.createJoint(djdB);
+	}
+
+	void update() {
+		imp = tImpactor.getPosition();
+		fill(c);
+		noStroke();
+		beginShape();
+		vertex(topAnchor.x, topAnchor.y);
+		vertex(tEnd.x, tEnd.y);
+		bezierVertex(imp.x, imp.y, topStart.x, topStart.y, topStart.x, topStart.y);
+		endShape(); 
+	}
+
+	void impulse() {
+		float ping = random(-1,1);
+		int pinger = 1;
+		if (ping > 0) pinger = 1;
+		if (ping <= 0) pinger = -1;
+		Vec2 appliedForce = new Vec2(force.x*pinger, force.y/2);
+		// Apply force
+		tImpactor.body.applyLinearImpulse(appliedForce, imp);
+	}
+}
+
+

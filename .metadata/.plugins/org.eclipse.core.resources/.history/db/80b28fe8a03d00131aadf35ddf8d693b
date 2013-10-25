@@ -1,0 +1,42 @@
+import processing.core.*;
+import pbox2d.*;
+import org.jbox2d.common.*;
+import org.jbox2d.dynamics.joints.*;
+import org.jbox2d.collision.shapes.*;
+import org.jbox2d.collision.shapes.Shape;
+import org.jbox2d.common.*;
+import org.jbox2d.dynamics.*;
+import org.jbox2d.dynamics.contacts.*;
+ 
+public class MainApp extends PApplet {
+ 
+	private static final long serialVersionUID = 7561908389779951086L;
+	
+
+	PBox2D box2d;
+	SpringyWave wave;
+	SpringyTriangle triangle;
+	
+    @Override
+	public void setup() {
+        size(640, 480, P3D);
+    }
+ 
+    @Override
+	public void draw() {
+        background(220);
+ 
+        theta += 0.01;
+ 
+        pushMatrix();
+        translate(width * 0.5f, height * 0.5f, 0);
+        rotateY(theta);
+        rotateX(theta);
+        box(100);
+        popMatrix();
+    }
+    
+    public static void main(String args[]) {
+		PApplet.main(new String[] { /*"--present",*/ "MainApp" }); /*"--present",*/
+	}
+}

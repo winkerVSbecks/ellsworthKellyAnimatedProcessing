@@ -1,0 +1,122 @@
+// The Nature of Code
+// <http://www.shiffman.net/teaching/nature>
+// Spring 2010
+// PBox2D example
+// A circular particle
+
+import pbox2d.*;
+import processing.core.PApplet;
+import org.jbox2d.common.*;
+import org.jbox2d.collision.shapes.*;
+import org.jbox2d.dynamics.*;
+
+public class Particle {
+
+	PApplet p; 
+	PBox2D b;
+	
+	// We need to keep track of a Body and a radius
+	Body body;
+	float r;
+	float x,y;
+
+	int col;
+
+	Particle(PApplet _p, PBox2D _b, float _x, float _y, float r_, boolean fixed) {
+		p=_p;
+		b = _b;
+		r = r_;
+		x = _x;
+		y = _y;
+
+		BodyDef bd = new BodyDef();
+		if (fixed) bd.type = BodyType.STATIC;
+		else bd.type = BodyType.DYNAMIC;
+
+		// Set its position
+		bd.position = b.coordPixelsToWorld(x,y);
+		body = b.world.createBody(bd);
+
+		// Make the body's shape a circle
+		// Make the body's shape a circle
+		CircleShape cs = new CircleShape();
+		cs.m_radius = b.scalarPixelsToWorld(r);
+
+		FixtureDef fd = new FixtureDef();
+		fd.shape = cs;
+		// Parameters that affect physics
+		fd.density = 1;
+		fd.friction = 0.3f;
+		fd.restitution = 0.5f;
+
+		body.createFixture(fd);
+
+		col = 175;
+	}
+
+	// This function removes the particle from the box2d world
+	void killBody() {
+		b.destroyBody(body);
+	}
+
+	// Is the particle ready for deletion?
+	boolean done() {
+		// Let's find the screen position of the particle
+		Vec2 pos = b.getBodyPixelCoord(body);
+		// Is it off the bottom of the screen?
+		if (pos.y > p.height+r*2) {
+			killBody();
+			return true;
+		}
+		return false;
+	}
+
+	 boolean overEvent() {
+		    float disX = tempxpos - mouseX;
+		    float disY = tempypos - mouseY;
+		    if (sqrt(sq(disX) + sq(disY)) < size/2 ) {
+		      return true;
+		    } else {
+		      return false;
+		    }
+		  }
+		  
+	  // Make sure no other springs are active
+	  boolean otherOver() {
+	    for (int i=0; i<num; i++) {
+	      if (i != me) {
+	        if (friends[i].over == true) {
+	          return true;
+	        }
+	      }
+	    }
+	    return false;
+	  }
+	
+	void display() {
+		// We look at each body and get its screen position
+		Vec2 pos = b.getBodyPixelCoord(body);
+		// Get its angle of rotation
+		float a = body.getAngle();
+		p.pushMatrix();
+			p.translate(pos.x,pos.y);
+			p.rotate(a);
+			p.fill(col);
+			p.stroke(0);
+			p.strokeWeight(1);
+			p.ellipse(0,0,r*2,r*2);
+			// Let's add a line so we can see the rotation
+			p.line(0,0,r,0);
+		p.popMatrix();
+	}
+
+	Vec2 getPosition() {
+		// We look at each body and get its screen position
+		Vec2 pos = b.getBodyPixelCoord(body);
+		return pos;
+	}
+
+
+}
+
+

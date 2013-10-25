@@ -1,0 +1,60 @@
+import processing.core.*;
+import pbox2d.*;
+import org.jbox2d.common.*;
+import org.jbox2d.dynamics.joints.*;
+import org.jbox2d.collision.shapes.*;
+import org.jbox2d.collision.shapes.Shape;
+import org.jbox2d.common.*;
+import org.jbox2d.dynamics.*;
+import org.jbox2d.dynamics.contacts.*;
+ 
+public class MainApp extends PApplet {
+ 
+	private static final long serialVersionUID = 7561908389779951086L;
+	
+
+	PBox2D box2d;
+	SpringyTriangle triangle;
+	
+    @Override
+	public void setup() {
+        size(640, 480, P3D);
+        noStroke();
+        smooth();
+        
+        box2d = new PBox2D(this);
+        box2d.createWorld();
+        box2d.setGravity(0, 20);
+        
+        // Triangle (ALIZARIN)  
+        triangle = new SpringyTriangle(
+          new PVector(20, 200),
+          new PVector(215, 60),
+          new PVector(410, 200),
+          0xE74C3C,
+          new Vec2(-150, -150)
+        );
+
+    }
+ 
+    @Override
+	public void draw() {
+    	background(#ffffff);
+	    pushMatrix();
+		    translate(width/4, 0);
+		    wave.update();
+		    triangle.update(); 
+		    if (frameCount%90 == 0) {
+		    	triangle.impulse();
+		    	wave.impulse();
+		    } 
+	    popMatrix();
+	  
+	  // We must always step through time!
+	  box2d.step();
+    }
+    
+    public static void main(String args[]) {
+		PApplet.main(new String[] { /*"--present",*/ "MainApp" }); /*"--present",*/
+	}
+}
